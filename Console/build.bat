@@ -1,0 +1,1 @@
+C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc -r:System.IO.Compression.dll -r:System.IO.Compression.FileSystem.dll Application.cs
