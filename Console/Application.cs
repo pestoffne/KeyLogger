@@ -55,7 +55,7 @@ namespace Foo
     {
       if (keys_buffer.Count() == 0)
       {
-        Console.WriteLine("Нечего сохранять");
+        Console.WriteLine("Нечего сохранять. {0}", text_filename);
         return;
       }
 
@@ -298,7 +298,7 @@ namespace Foo
 
       const int sleep_ms = 2;
       const int scan_time_ms = 13;
-      const int j = 30 * 1000 / (sleep_ms + scan_time_ms);
+      const int j = 60 * 1000 / (sleep_ms + scan_time_ms);
       const int max_buffer_count = 4096 - 14;
 
       while (true)

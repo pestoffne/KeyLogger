@@ -14,8 +14,8 @@ namespace Foo
 
     static void Main(string[] argv)
     {
-/*
-      // Распаковка архива с расшифровкой каждого файла в нём. Падает в DecryptData.
+///*
+      // Распаковка архива с расшифровкой каждого файла в нём. Работает нормально.
       if (argv.Length == 2)
       {
         string archive_filename = argv[0];
@@ -32,24 +32,24 @@ namespace Foo
           foreach (ZipArchiveEntry entry in archive.Entries)
           {
             string output_file = output_dir + "/" + entry.FullName;
-            Console.WriteLine("Debug: output_file = {0}", output_file);
 
             using (Stream entry_stream = entry.Open())
             {
               using (Stream output_stream = new FileStream(output_file, FileMode.CreateNew, FileAccess.Write))
               {
-                Console.WriteLine("DecryptData start.");
-                Foo.Cryptography.DecryptData(entry_stream, output_stream, password, salt);
-                Console.WriteLine("DecryptData stop.");
+                Foo.Cryptography.DecryptData2(entry_stream, output_stream, password, salt);
               }
             }
           }
         }
+
+        Console.WriteLine("Decrypted.");
+        return;
       }
 
       Console.WriteLine("Использование: Decryptor.exe <zip_архив_с_шифрованными_файлами> <папка_результат>");
-*/
-
+//*/
+/*
       // Распаковка архива в папку с файлами, расшифровка каждого файла. Работает нормально
       if (argv.Length == 3)
       {
@@ -81,9 +81,9 @@ namespace Foo
           {
             using (Stream output_stream = new FileStream(output_file, FileMode.CreateNew, FileAccess.Write))
             {
-              Console.WriteLine("DecryptData start.");
-              Foo.Cryptography.DecryptData(encrypted_stream, output_stream, password, salt);
-              Console.WriteLine("DecryptData stop.");
+              Console.WriteLine("DecryptData2 start.");
+              Foo.Cryptography.DecryptData2(encrypted_stream, output_stream, password, salt);
+              Console.WriteLine("DecryptData2 stop.");
             }
           }
         }
@@ -93,6 +93,7 @@ namespace Foo
       }
 
       Console.WriteLine("Использование: Decryptor.exe <zip_архив_с_шифрованными_файлами> <промежуточная_папка> <папка_результат>");
+*/
     }
   }
 }
